@@ -1,10 +1,13 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using ApiOAuthEmpleados.Helper;
 using ApiOAuthEmpleados.Models;
 using ApiOAuthEmpleados.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace ApiOAuthEmpleados.Controllers
 {
@@ -40,11 +43,20 @@ namespace ApiOAuthEmpleados.Controllers
                 //EL TOKEN SE GENERA CON UNA CLASE
                 //Y DEBEMOS INDICAR LOS DATOS QUE ALMACENARA EN SU 
                 //INTERIOR
+
+                //esto es para meter info en el token
+                string jsonEmpleado = JsonConvert.SerializeObject(empleado);
+                Claim[] informacion = new[]
+                {
+                    new Claim("UserData", jsonEmpleado)
+                };
+
                 JwtSecurityToken token = new JwtSecurityToken(
+                    claims: informacion,
                     issuer: this.helper.Issuer,
                     audience: this.helper.Audience,
                     signingCredentials: credentials,
-                    expires: DateTime.UtcNow.AddMinutes(20),
+                    expires: DateTime.UtcNow.AddMinutes(30),
                     notBefore: DateTime.UtcNow
                 );
                 //POR ULTIMO, DEVOLVEMOS LA RESPUESTA AFIRMATIVA
@@ -52,13 +64,15 @@ namespace ApiOAuthEmpleados.Controllers
                 return Ok(new
                 {
                     response = new JwtSecurityTokenHandler().WriteToken(token)
-                });
+                }); 
             }
 
 
             return Unauthorized();
 
         }
+
+
 
     }
 }

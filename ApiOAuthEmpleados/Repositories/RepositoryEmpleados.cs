@@ -31,6 +31,13 @@ namespace ApiOAuthEmpleados.Repositories
             //3.Performance: FindAsync can be more efficient for primary key lookups because it avoids a database query if the entity is already tracked.
         }
 
+        public async Task<List<Empleado>> GetCompisEmpleadoAsync(int idDepartamento)
+        {
+            return await this.context.Empleados
+            .Where(x => x.IdDepartamento == idDepartamento)
+            .ToListAsync();
+        }
+
         public async Task<Empleado> LoginAsync(string apellido, int idEmpleado)
         {
             return await this.context.Empleados.FirstOrDefaultAsync(x => x.Apellido == apellido && x.IdEmpleado == idEmpleado);

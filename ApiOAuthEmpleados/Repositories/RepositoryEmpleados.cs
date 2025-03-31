@@ -46,5 +46,32 @@ namespace ApiOAuthEmpleados.Repositories
 //2.Flexibility: Using Where followed by FirstOrDefaultAsync can be more flexible if you need to apply additional query operations before finding the first entity.
 //3.Performance: Both methods generate similar SQL queries and have similar performance characteristics.The choice between them is more about code readability and flexibility.
         }
+
+        public async Task<List<string>> GetOficiosAsync()
+        {
+            var consulta = (from datos in this.context.Empleados
+                            select datos.Oficio).Distinct();
+            return await consulta.ToListAsync();
+        }
+
+        public async Task<List<Empleado>> GetEmpleadosByOficioAsync(List<string> oficios)
+        {
+            var consulta = from datos in this.context.Empleados
+                           where oficios.Contains(datos.Oficio)
+                           select datos;
+            return await consulta.ToListAsync();
+            //return await this.context.Empleados.Where(x => oficios.Contains(x.Oficio)).ToListAsync();
+        }
+
+        public async Task IncrementarSalariosAsync(int incremento, List<string> oficios)
+        {
+            List<Empleado> empleados = await this.GetEmpleadosByOficioAsync(oficios);
+            foreach (Empleado emp in empleados)
+            {
+                emp.Salario += incremento;
+            }
+            await this.context.SaveChangesAsync();
+        }
+
     }
 }
